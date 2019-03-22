@@ -71,7 +71,7 @@ class TodoSimple(Resource):
                           }
         return {todo_id: todos[todo_id]}
 
-class ItunesAlbum(Resource):
+class ItunesAlbums(Resource):
     decorators = [ limiter.limit("1 per second") ]
 
     def get(self):
