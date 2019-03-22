@@ -62,9 +62,11 @@ class TodoSimple(Resource):
 
     @auth.login_required
     def put(self, todo_id):
-        print request.headers
-        todos[todo_id] = {'detail': request.form['detail'],
-                          'date': request.form['date']
+        json_data = request.get_json(force=True)
+        detail = json_data["detail"]
+        date = json_data["date"]
+        todos[todo_id] = {'detail': detail,
+                          'date': date
                           }
         return {todo_id: todos[todo_id]}
 
