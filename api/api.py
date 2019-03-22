@@ -80,7 +80,10 @@ class ItunesAlbums(Resource):
     @auth.login_required
     def post(self):
         json_data = request.get_json(force=True)
-        album_id = int(max(ALBUMS.keys()).lstrip('album')) + 1
+        if ALBUMS.keys():
+            album_id = int(max(ALBUMS.keys()).lstrip('album')) + 1
+        else:
+            album_id = 1
         album_id = 'album%i' % album_id
         ALBUMS[album_id] = {'album': json_data}
         return ALBUMS[album_id], 201
