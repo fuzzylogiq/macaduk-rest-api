@@ -55,9 +55,9 @@ class HelloWorld(Resource):
 
 class ItunesAlbums(Resource):
     decorators = [ limiter.limit("1 per second") ]
+    print ALBUMS
 
     def get(self):
-        print ALBUMS
         return ALBUMS
 
     @auth.login_required
