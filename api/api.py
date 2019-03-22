@@ -54,23 +54,6 @@ class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
 
-
-class TodoSimple(Resource):
-    decorators = [ limiter.limit("1 per second") ]
-
-    def get(self, todo_id):
-        return {todo_id: todos[todo_id]}
-
-    @auth.login_required
-    def put(self, todo_id):
-        json_data = request.get_json(force=True)
-        detail = json_data["detail"]
-        date = json_data["date"]
-        todos[todo_id] = {'detail': detail,
-                          'date': date
-                          }
-        return {todo_id: todos[todo_id]}
-
 class ItunesAlbums(Resource):
     decorators = [ limiter.limit("1 per second") ]
 
@@ -80,6 +63,7 @@ class ItunesAlbums(Resource):
     @auth.login_required
     def post(self):
         json_data = request.get_json(force=True)
+        print json_data
         if ALBUMS.keys():
             album_id = int(max(ALBUMS.keys()).lstrip('album')) + 1
         else:
@@ -87,8 +71,6 @@ class ItunesAlbums(Resource):
         album_id = 'album%i' % album_id
         ALBUMS[album_id] = {'album': json_data}
         return ALBUMS[album_id], 201
-
-
 
 api.add_resource(HelloWorld, '/api/v1')
 api.add_resource(TodoSimple, '/api/v1/todo/<int:todo_id>')
