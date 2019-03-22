@@ -71,7 +71,7 @@ class ItunesAlbums(Resource):
         else:
             album_id = 1
         album_id = 'album%i' % album_id
-        ALBUMS[album_id] = {'album': json_data}
+        ALBUMS[album_id] = json_data
         return ALBUMS[album_id], 201
 
 api.add_resource(HelloWorld, '/api/v1')
