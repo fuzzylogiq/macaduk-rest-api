@@ -41,7 +41,6 @@ USER_DATA = {
     'admin': 'YouShallNotPass'
 }
 
-todos = {}
 ALBUMS = {}
 
 @auth.verify_password
@@ -58,6 +57,7 @@ class ItunesAlbums(Resource):
     decorators = [ limiter.limit("1 per second") ]
 
     def get(self):
+        print ALBUMS
         return ALBUMS
 
     @auth.login_required
