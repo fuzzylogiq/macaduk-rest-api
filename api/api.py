@@ -73,7 +73,7 @@ class ItunesAlbums(Resource):
         return ALBUMS[album_id], 201
 
 api.add_resource(HelloWorld, '/api/v1')
-api.add_resource(TodoSimple, '/api/v1/todo/<int:todo_id>')
 api.add_resource(ItunesAlbums, '/api/v1/albums')
+
 if __name__ == '__main__':
     app.run(debug=True)
