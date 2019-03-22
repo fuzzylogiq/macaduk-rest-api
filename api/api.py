@@ -42,6 +42,7 @@ USER_DATA = {
 }
 
 todos = {}
+ALBUMS = {}
 
 @auth.verify_password
 def verify(username, password):
@@ -70,10 +71,24 @@ class TodoSimple(Resource):
                           }
         return {todo_id: todos[todo_id]}
 
+class ItunesAlbum(Resource):
+    decorators = [ limiter.limit("1 per second") ]
+
+    def get(self, album_id):
+        return {album_id: albums[album_id]}
+
+    @auth.login_required
+    def post(self):
+        json_data = request.get_json(force=True)
+        album_id = int(max(ALBUMS.keys()).lstrip('album')) + 1
+        album_id = 'album%i' % album_id
+        ALBUMS[album_id] = {'album': json_data}
+        return ALBUMS[album_id], 201
 
 
 
-api.add_resource(HelloWorld, '/')
-api.add_resource(TodoSimple, '/todo/<int:todo_id>')
+api.add_resource(HelloWorld, '/api/v1')
+api.add_resource(TodoSimple, '/api/v1/todo/<int:todo_id>')
+api.add_resource(ItunesAlbum, '/api/v1/album/<int:album_id>')
 if __name__ == '__main__':
     app.run(debug=True)
