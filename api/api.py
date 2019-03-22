@@ -74,8 +74,8 @@ class TodoSimple(Resource):
 class ItunesAlbum(Resource):
     decorators = [ limiter.limit("1 per second") ]
 
-    def get(self, album_id):
-        return {album_id: albums[album_id]}
+    def get(self):
+        return ALBUMS
 
     @auth.login_required
     def post(self):
@@ -89,6 +89,6 @@ class ItunesAlbum(Resource):
 
 api.add_resource(HelloWorld, '/api/v1')
 api.add_resource(TodoSimple, '/api/v1/todo/<int:todo_id>')
-api.add_resource(ItunesAlbum, '/api/v1/album/<int:album_id>')
+api.add_resource(ItunesAlbums, '/api/v1/albums')
 if __name__ == '__main__':
     app.run(debug=True)
