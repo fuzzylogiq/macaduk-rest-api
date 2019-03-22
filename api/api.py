@@ -65,7 +65,8 @@ class ItunesAlbums(Resource):
     @auth.login_required
     def post(self):
         json_data = request.get_json(force=True)
-        print json_data
+        if json_data in ALBUMS.values():
+            return {"message": "Album already exists"}, 409
         if ALBUMS.keys():
             album_id = int(max(ALBUMS.keys()).lstrip('album')) + 1
         else:
