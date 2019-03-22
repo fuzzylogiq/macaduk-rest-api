@@ -41,7 +41,9 @@ USER_DATA = {
     'admin': 'YouShallNotPass'
 }
 
-ALBUMS = {}
+ALBUMS = {
+    'album1': { 'album': {'name': 'poop'} }
+}
 
 @auth.verify_password
 def verify(username, password):
