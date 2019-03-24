@@ -111,6 +111,7 @@ class AlbumM(db.Model, Serializer):
         d = Serializer.serialize(self)
         return d
 
+db.create_all()
 
 class HelloWorld(Resource):
     def get(self):
