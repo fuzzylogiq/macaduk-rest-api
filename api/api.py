@@ -167,7 +167,7 @@ class Albums(Resource):
                     )
             db.session.add(album)
             db.session.commit()
-            print db.session.query(AlbumM).count()
+            print "Count: %i" % db.session.query(AlbumM).count()
             return json.dumps(album.serialize()), 201
         except IntegrityError as e:
             return message("Album already exists"), 409
