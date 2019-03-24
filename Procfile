@@ -1,1 +1,1 @@
-web: gunicorn -b 0.0.0.0:$PORT -w 4 --chdir api api:app 
+web: gunicorn -b 0.0.0.0:$PORT -w 1 --chdir api api:app 
