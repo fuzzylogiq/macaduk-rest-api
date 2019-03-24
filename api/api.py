@@ -22,34 +22,68 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_httpauth import HTTPBasicAuth
 from flask_restful import Resource, Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_sqlalchemy import SQLAlchemy
 import os
+import click
+import json
 import psycopg2
+from sqlalchemy.inspection import inspect
+from sqlalchemy.exc import IntegrityError
+
+class Serializer(object):
+
+    def serialize(self):
+        return {c: getattr(self, c) for c in inspect(self).attrs.keys()}
+
+    @staticmethod
+    def serialize_list(l):
+        return [m.serialize() for m in l]
 
 DATABASE_URL = os.environ['DATABASE_URL']
+
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
 api = Api(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+
 limiter = Limiter(
     app,
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"]
 )
 
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+conn = psycopg2.connect(DATABASE_URL)
 
 USER_DATA = {
     'admin': 'YouShallNotPass'
 }
 
-ALBUMS = {
-    'album1': { 'album': {'name': 'poop'} }
-}
+ALBUMS = {}
+
+@app.cli.command()
+def resetdb():
+    """Destroys and creates the database + tables."""
+
+    from sqlalchemy_utils import database_exists, create_database, drop_database
+    if database_exists(DATABASE_URL):
+        print('Deleting database.')
+        drop_database(DATABASE_URL)
+    if not database_exists(DATABASE_URL):
+        print('Creating database.')
+        create_database(DATABASE_URL)
+
+    print('Creating tables.')
+    db.create_all()
+    print('Shiny!')
 
 @auth.verify_password
 def verify(username, password):
@@ -57,32 +91,81 @@ def verify(username, password):
         return False
     return USER_DATA.get(username) == password
 
+def message(m):
+    return { 'message': m }
+
+class AlbumM(db.Model, Serializer):
+    __tablename__ = 'albums'
+    __table_args__ = (
+        db.UniqueConstraint('artist', 'name', name='unique_artist_album'),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    artist = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+
+    def __init__(self, artist, name):
+        self.artist = artist
+        self.name = name
+
+    def serialize(self):
+        d = Serializer.serialize(self)
+        return d
+
+
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
 
-class ItunesAlbums(Resource):
-    decorators = [ limiter.limit("1/2s") ]
-    print ALBUMS
+class Album(Resource):
+    def get(self, album_id):
+        album = ALBUMS.get(album_id)
+        if album:
+            return album
+        else:
+            return message("Album does not exist"), 404
+
+    @auth.login_required
+    def put(self, album_id):
+        album = ALBUMS.get(album_id)
+        if album:
+            ALBUMS[album_id].update(request.get_json(force=True))
+            return album, 200
+        else:
+            return message("Album does not exist"), 404
+
+    @auth.login_required
+    def delete(self, album_id):
+        album = ALBUMS.get(album_id)
+        if album:
+            ALBUMS.pop(album_id)
+            return message("Album deleted"), 200
+        else:
+            return message("Album does not exist"), 404
+
+class Albums(Resource):
+    decorators = [ limiter.limit("1 per second") ]
 
     def get(self):
-        return ALBUMS
+        albums = AlbumM.query.all()
+        return jsonify(AlbumM.serialize_list(albums))
 
     @auth.login_required
     def post(self):
         json_data = request.get_json(force=True)
-        if json_data in ALBUMS.values():
-            return {"message": "Album already exists"}, 409
-        if ALBUMS.keys():
-            album_id = int(max(ALBUMS.keys()).lstrip('album')) + 1
-        else:
-            album_id = 1
-        album_id = 'album%i' % album_id
-        ALBUMS[album_id] = json_data
-        return ALBUMS[album_id], 201
+        try:
+            album  = AlbumM(
+                    name=json_data['name'],
+                    artist=json_data['artist']
+                    )
+            db.session.add(album)
+            db.session.commit()
+            return json.dumps(album.serialize()), 201
+        except IntegrityError as e:
+            return message("Album already exists"), 409
 
 api.add_resource(HelloWorld, '/api/v1')
-api.add_resource(ItunesAlbums, '/api/v1/albums')
+api.add_resource(Album, '/api/v1/album/<int:album_id>')
+api.add_resource(Albums, '/api/v1/albums')
 
 if __name__ == '__main__':
     app.run(debug=True)
