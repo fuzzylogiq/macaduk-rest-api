@@ -129,8 +129,8 @@ class Album(Resource):
     def put(self, album_id):
         album = AlbumM.query.get(album_id)
         if album:
-            name = request.get_json.get('name')
-            artist = request.get_json.get('artist')
+            name = request.get_json().get('name')
+            artist = request.get_json().get('artist')
             if name:
                 album.name = name
             if artist:
