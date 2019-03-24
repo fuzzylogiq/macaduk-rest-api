@@ -72,7 +72,7 @@ ALBUMS = {}
 @app.cli.command()
 def resetdb():
     """Destroys and creates the database + tables."""
-
+    print DATABASE_URL
     from sqlalchemy_utils import database_exists, create_database, drop_database
     if database_exists(DATABASE_URL):
         print('Deleting database.')
