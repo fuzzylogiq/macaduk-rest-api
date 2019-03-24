@@ -127,9 +127,15 @@ class Album(Resource):
 
     @auth.login_required
     def put(self, album_id):
-        album = ALBUMS.get(album_id)
+        album = AlbumM.query.get(album_id)
         if album:
-            ALBUMS[album_id].update(request.get_json(force=True))
+            name = request.get_json.get('name')
+            artist = request.get_json.get('artist')
+            if name:
+                album.name = name
+            if artist:
+                album.artist = artist
+            db.session.commit()
             return album, 200
         else:
             return message("Album does not exist"), 404
