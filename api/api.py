@@ -145,6 +145,7 @@ class Album(Resource):
         album = AlbumM.query.get(album_id)
         if album:
             db.session.delete(album)
+            db.session.commit()
             return message("Album deleted"), 200
         else:
             return message("Album does not exist"), 404
