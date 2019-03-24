@@ -119,7 +119,7 @@ class HelloWorld(Resource):
 
 class Album(Resource):
     def get(self, album_id):
-        album = ALBUMS.get(album_id)
+        album = AlbumM.query(album_id)
         if album:
             return album
         else:
