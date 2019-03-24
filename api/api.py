@@ -27,9 +27,11 @@ from flask_httpauth import HTTPBasicAuth
 from flask_restful import Resource, Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.contrib.fixers import ProxyFix
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=1)
 api = Api(app)
 limiter = Limiter(
     app,
