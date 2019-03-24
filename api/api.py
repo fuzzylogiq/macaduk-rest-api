@@ -27,17 +27,21 @@ from flask_httpauth import HTTPBasicAuth
 from flask_restful import Resource, Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from werkzeug.contrib.fixers import ProxyFix
+import os
+import psycopg2
+
+DATABASE_URL = os.environ['DATABASE_URL']
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=1)
 api = Api(app)
 limiter = Limiter(
     app,
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"]
 )
+
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 USER_DATA = {
     'admin': 'YouShallNotPass'

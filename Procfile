@@ -1,1 +1,1 @@
-web: gunicorn -b 0.0.0.0:$PORT -w 1 --chdir api api:app 
+web: gunicorn -w 1 --chdir api --log-level debug api:app 
