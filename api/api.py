@@ -136,7 +136,7 @@ class Album(Resource):
             if artist:
                 album.artist = artist
             db.session.commit()
-            return album, 200
+            return jsonify(album.serialize()), 200
         else:
             return message("Album does not exist"), 404
 
