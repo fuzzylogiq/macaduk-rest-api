@@ -121,7 +121,7 @@ class Album(Resource):
     def get(self, album_id):
         album = AlbumM.query.get(album_id)
         if album:
-            return album
+            return jsonify(album.serialize())
         else:
             return message("Album does not exist"), 404
 
