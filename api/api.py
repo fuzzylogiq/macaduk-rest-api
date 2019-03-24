@@ -56,7 +56,7 @@ class HelloWorld(Resource):
         return {'hello': 'world'}
 
 class ItunesAlbums(Resource):
-    decorators = [ limiter.limit("1 per second") ]
+    decorators = [ limiter.limit("1 per 2 seconds") ]
     print ALBUMS
 
     def get(self):
