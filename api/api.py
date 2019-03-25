@@ -26,7 +26,7 @@ from flask import Flask, request, jsonify
 from flask_httpauth import HTTPBasicAuth
 from flask_restful import Resource, Api
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_limiter.util import get_ipaddr
 from flask_sqlalchemy import SQLAlchemy
 import os
 import click
